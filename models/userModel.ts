@@ -1,4 +1,10 @@
-import * as mongoose from 'mongoose';
+import mongoose, { Schema, Model, Document } from 'mongoose';
+
+interface IUser extends Document {
+    user: string;
+    email: string;
+    password: string;
+}
 
 const userSchema = new mongoose.Schema({
     name: {
@@ -18,4 +24,7 @@ const userSchema = new mongoose.Schema({
     timestamps: true
 })
 
-module.exports = mongoose.model('User', userSchema)
+// const Contact: Model<IContact> = mongoose.model<IContact>('Contact', contactSchema);
+const User: Model<IUser> = mongoose.model<IUser>('User', userSchema)
+
+export default User
