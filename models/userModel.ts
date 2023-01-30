@@ -1,7 +1,9 @@
-import mongoose, { Schema, Model, Document } from 'mongoose';
+import mongoose, { Schema, Model, Document, ObjectId } from 'mongoose';
 
+// TODO - Read Mongoose docs for Document
 interface IUser extends Document {
-    user: string;
+    _id?: ObjectId;
+    name: string;
     email: string;
     password: string;
 }
