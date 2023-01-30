@@ -2,6 +2,7 @@ import jwt from 'jsonwebtoken'
 import bcrypt from 'bcryptjs'
 import asyncHandler from 'express-async-handler'
 import User from '../models/userModel'
+import { ObjectId } from 'mongoose'
 
 // @desc    Register new user
 // @route   POST /api/users
@@ -79,7 +80,7 @@ const loginUser = asyncHandler(async (req, res) =>{
 // })
 
 // generate token
-const generateToken = (id) => {
+const generateToken = (id: ObjectId) => {
     const secret = process.env.JWT_SECRET || '';
     if (!secret) {
       throw new Error('JWT_SECRET is not defined');
@@ -87,8 +88,6 @@ const generateToken = (id) => {
     return jwt.sign({ id }, secret, { expiresIn: '30d' });
   };
 
-module.exports = {
-    registerUser,
-    loginUser
-    // getMe
-}
+
+const funcs = { registerUser, loginUser }
+export default funcs
