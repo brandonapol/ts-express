@@ -3,6 +3,11 @@ import bcrypt from 'bcryptjs'
 import asyncHandler from 'express-async-handler'
 import User from '../models/userModel'
 import { ObjectId } from 'mongoose'
+import { Request, Response, NextFunction } from 'express'
+
+interface IRequest extends Request {
+    user?: any,
+}
 
 // @desc    Register new user
 // @route   POST /api/users
@@ -68,16 +73,25 @@ const loginUser = asyncHandler(async (req, res) =>{
 // @route   GET /api/users/me
 // @access  Public
 // TODO: Update
-// const getMe = asyncHandler(async (req, res) =>{
-//     //* we 'got' user.id from authMiddleware
-//     const { _id, name, email } = await User.findById(req.user.id)
+const getMe = asyncHandler(async (req: IRequest, res) =>{
+    //* we 'got' user.id from authMiddleware
+    const result = await User.findById(req.user.id)
 
-//     res.status(200).json({
-//         id: _id,
-//         name,
-//         email
-//     })
-// })
+    // result type is (IUser & Required<{ _id: ObjectId; }>) | null
+    // so we need to check to ensure that it isn't null
+    if (!result) {
+        res.status(400).json({ msg: 'User not found' })
+    } else {
+
+    const { _id, name, email } = result
+
+    res.status(200).json({
+        id: _id,
+        name,
+        email
+    })
+    }
+})
 
 // generate token
 const generateToken = (id: ObjectId) => {
@@ -89,5 +103,5 @@ const generateToken = (id: ObjectId) => {
   };
 
 
-const funcs = { registerUser, loginUser }
+const funcs = { registerUser, loginUser, getMe }
 export default funcs
