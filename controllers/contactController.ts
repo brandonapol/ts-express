@@ -1,15 +1,30 @@
 // const asyncHandler = require('express-async-handler')
 import asyncHandler from 'express-async-handler'
+import { Request } from 'express'
 
 // const Contact = require('../models/contactModel')
 import Contact from '../models/contactModel'
 // const User = require('../models/contactModel')
 import User  from '../models/userModel'
 
-const getContacts = asyncHandler(async(req:any, res:any) => {
-    const contacts = await Contact.find({ user: req.user.id })
+interface IRequest extends Request {
+    user: {
+        id: any
+    },
+}
 
-    res.status(200).json(contacts)
+const getContacts = asyncHandler(async(req: IRequest, res:any) => {
+
+    const userReq = req.user
+    try {
+        if (userReq.id !== undefined) {
+            const contacts = await Contact.find({ user: userReq })
+            res.status(200).json(contacts)
+        }
+    } catch {
+        res.status(400)
+        throw new Error('No user submitted')
+    }
 })
 
 const setContact = asyncHandler(async (req:any, res:any) => {
