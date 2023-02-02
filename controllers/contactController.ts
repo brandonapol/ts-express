@@ -14,7 +14,7 @@ interface IRequest extends Request {
     },
 }
 
-const getID = async ( req: IRequest ) => {
+const getID = async ( req: IRequest ): Promise<any> => {
     let token: string | undefined;
     if(req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
         try {
@@ -68,7 +68,7 @@ const setContact = asyncHandler(async (req:any, res:any) => {
 // @desc    Update contacts
 // @route   PUT /api/contacts/:id
 // @access  Private
-const updateContact = asyncHandler(async (req:any, res:any) => {
+const updateContact = asyncHandler(async (req:IRequest, res:any) => {
     const contact = await Contact.findById(req.params.id)
 
     if (!contact) {
@@ -76,8 +76,10 @@ const updateContact = asyncHandler(async (req:any, res:any) => {
         throw new Error('Contact not found')
     }
 
+    // get currently logged in user's ID
     const userID = await getID(req)
-    const user = await User.findById(req.user.id)
+    // get rest of logged in user's data based off their ID
+    const user = await User.findById(userID)
 
     if (!user) {
         res.status(401)
