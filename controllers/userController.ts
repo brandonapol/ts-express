@@ -76,6 +76,8 @@ const loginUser = asyncHandler(async (req, res) =>{
 const getMe = asyncHandler(async (req: IRequest, res) =>{
     // * we 'got' user.id from authMiddleware
     const result = await User.findById(req.user.id)
+    // tslint:disable-next-line:no-console
+    console.log(result)
 
     // result type is (IUser & Required<{ _id: ObjectId; }>) | null
     // so we need to check to ensure that it isn't null

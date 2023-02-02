@@ -1,7 +1,7 @@
 import mongoose, { Schema, Model, Document } from 'mongoose';
 
 interface IContact extends Document {
-    user?: string;
+    user: string;
     name: string;
     email: string;
     address: string;

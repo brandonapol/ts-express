@@ -1,6 +1,7 @@
 // const asyncHandler = require('express-async-handler')
 import asyncHandler from 'express-async-handler'
-import { Request } from 'express'
+import { Request, Response } from 'express'
+import jwt from 'jsonwebtoken'
 
 // const Contact = require('../models/contactModel')
 import Contact from '../models/contactModel'
@@ -13,12 +14,31 @@ interface IRequest extends Request {
     },
 }
 
+const getID = async ( req: IRequest ) => {
+    let token: string | undefined;
+    if(req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+        try {
+            token = req.headers.authorization.split(' ')[1]
+            const decoded = jwt.verify(token, process.env.JWT_SECRET || '')
+            if (typeof decoded === 'object') {
+                const user = await User.findById(decoded.id).select('-password')
+                return user
+            }
+        } catch {
+            throw new Error('Cannot find user in GetID')
+        }
+    }
+}
+
+
+
 const getContacts = asyncHandler(async(req: IRequest, res:any) => {
 
-    const userReq = req.user
+    // TODO: THIS IS YOUR BUG
+    const user = await getID(req)
     try {
-        if (userReq.id !== undefined) {
-            const contacts = await Contact.find({ user: userReq })
+        if (user.id !== undefined) {
+            const contacts = await Contact.find({ user })
             res.status(200).json(contacts)
         }
     } catch {
@@ -28,14 +48,18 @@ const getContacts = asyncHandler(async(req: IRequest, res:any) => {
 })
 
 const setContact = asyncHandler(async (req:any, res:any) => {
-    if(!req.body.text) {
+    const user = await getID(req)
+    if(!req.body.name || !req.body.email || !req.body.address || !req.body.phone_number) {
         res.status(400)
-        throw new Error('Please add text field')
+        throw new Error('Please add all fields')
     }
 
     const contact = Contact.create({
-        text: req.body.text,
-        user: req.user.id,
+        user: user.id,
+        name: req.body.name,
+        email: req.body.email,
+        address: req.body.address,
+        phone_number: req.body.phone_number,
     })
 
     res.status(200).json(contact)
@@ -52,6 +76,7 @@ const updateContact = asyncHandler(async (req:any, res:any) => {
         throw new Error('Contact not found')
     }
 
+    const userID = await getID(req)
     const user = await User.findById(req.user.id)
 
     if (!user) {

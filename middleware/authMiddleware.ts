@@ -16,8 +16,12 @@ const protect = asyncHandler(async (req: IRequest, res: Response, next: NextFunc
         token = req.headers.authorization.split(' ')[1]
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET || '')
+        // tslint:disable-next-line:no-console
+        console.log(decoded)
         if (typeof decoded === 'object') {
             req.user = await User.findById(decoded.id).select('-password')
+            // * tslint:disable-next-line:no-console
+            // console.log(`User: ${ req.user }`)
         }
         next()
         } catch {
@@ -26,7 +30,7 @@ const protect = asyncHandler(async (req: IRequest, res: Response, next: NextFunc
         }
     }
 
-    if (token !== undefined){
+    if (token === undefined){
         res.status(401)
         throw new Error('Not authorized, no token')
     }
